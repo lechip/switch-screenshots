@@ -56,6 +56,9 @@ changelog:
       - "^test:"
 
 release:
+  github:
+    owner: lechip
+    name: switch-screenshots  # explicit name so GoReleaser never derives it from the git remote
   draft: false
   prerelease: auto
   mode: replace
