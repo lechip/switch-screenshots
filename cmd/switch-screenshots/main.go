@@ -18,12 +18,13 @@ var (
 
 func main() {
 	var (
-		input   string
-		output  string
-		dryRun  bool
-		byID    bool
-		verbose bool
-		ver     bool
+		input       string
+		output      string
+		dryRun      bool
+		byID        bool
+		verbose     bool
+		ver         bool
+		showSkipped bool
 	)
 
 	flag.StringVar(&input, "input", "", "path to the Switch SD card Album folder (required)")
@@ -31,9 +32,14 @@ func main() {
 	flag.StringVar(&output, "output", "./screenshotsOutput", "destination folder")
 	flag.StringVar(&output, "o", "./screenshotsOutput", "shorthand for --output")
 	flag.BoolVar(&dryRun, "dry-run", false, "print planned operations without copying any files")
+	flag.BoolVar(&dryRun, "n", false, "shorthand for --dry-run")
 	flag.BoolVar(&byID, "by-id", false, "use the raw 32-char game ID for folder names instead of the title")
-	flag.BoolVar(&verbose, "v", false, "log each file operation")
+	flag.BoolVar(&byID, "I", false, "shorthand for --by-id")
+	flag.BoolVar(&verbose, "verbose", false, "log each file operation")
+	flag.BoolVar(&verbose, "v", false, "shorthand for --verbose")
 	flag.BoolVar(&ver, "version", false, "print version information and exit")
+	flag.BoolVar(&showSkipped, "show-skipped", false, "list unrecognized files after the run")
+	flag.BoolVar(&showSkipped, "s", false, "shorthand for --show-skipped")
 	flag.Parse()
 
 	if ver {
@@ -48,11 +54,12 @@ func main() {
 	}
 
 	cfg := organizer.Config{
-		Input:   input,
-		Output:  output,
-		DryRun:  dryRun,
-		ByID:    byID,
-		Verbose: verbose,
+		Input:       input,
+		Output:      output,
+		DryRun:      dryRun,
+		ByID:        byID,
+		Verbose:     verbose,
+		ShowSkipped: showSkipped,
 	}
 
 	fmt.Printf("Organizing screenshots from %s → %s\n", cfg.Input, cfg.Output)
@@ -71,6 +78,13 @@ func main() {
 		fmt.Printf(", skipped %d unrecognized file(s)", result.Skipped)
 	}
 	fmt.Println()
+
+	if len(result.SkippedFiles) > 0 {
+		fmt.Println("\nUnrecognized files:")
+		for _, f := range result.SkippedFiles {
+			fmt.Printf("  %s\n", f)
+		}
+	}
 
 	if len(result.UnknownIDs) > 0 {
 		fmt.Println("\nUnknown game IDs (consider running: make update-gameids):")

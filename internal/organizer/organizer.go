@@ -18,18 +18,20 @@ var fileRe = regexp.MustCompile(`(?i)-([0-9A-Fa-f]{32})\.(jpg|mp4)$`)
 
 // Config controls a Run invocation.
 type Config struct {
-	Input   string
-	Output  string
-	DryRun  bool
-	ByID    bool
-	Verbose bool
+	Input       string
+	Output      string
+	DryRun      bool
+	ByID        bool
+	Verbose     bool
+	ShowSkipped bool
 }
 
 // Result summarizes a completed run.
 type Result struct {
-	Processed  int
-	Skipped    int
-	UnknownIDs map[string]int // game ID -> number of files with that ID
+	Processed    int
+	Skipped      int
+	SkippedFiles []string       // populated when Config.ShowSkipped is true
+	UnknownIDs   map[string]int // game ID -> number of files with that ID
 }
 
 // Run walks cfg.Input, copies matching media files into per-game subdirectories
@@ -54,6 +56,9 @@ func Run(cfg Config) (Result, error) {
 		m := fileRe.FindStringSubmatch(d.Name())
 		if m == nil {
 			res.Skipped++
+			if cfg.ShowSkipped {
+				res.SkippedFiles = append(res.SkippedFiles, path)
+			}
 			return nil
 		}
 

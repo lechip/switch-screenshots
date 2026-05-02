@@ -37,39 +37,44 @@ Prompt. To use it from any directory, add the extracted folder to your `PATH`.
 
 ## Usage
 
-```
+```bash
 switch-screenshots -i <Album folder> [-o <output folder>] [flags]
 ```
 
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--input` | `-i` | *(required)* | Path to the Switch SD card `Album` folder |
-| `--output` | `-o` | `./screenshotsOutput` | Destination folder |
-| `--dry-run` | | `false` | Print planned operations without copying |
-| `--by-id` | | `false` | Use the raw 32-char game ID instead of the title |
-| `--verbose` | `-v` | `false` | Log each file operation |
-| `--version` | | | Print version information and exit |
+| Flag             | Short | Default               | Description                                      |
+| ---------------- | ----- | --------------------- | ------------------------------------------------ |
+| `--input`        | `-i`  | *(required)*          | Path to the Switch SD card `Album` folder        |
+| `--output`       | `-o`  | `./screenshotsOutput` | Destination folder                               |
+| `--dry-run`      | `-n`  | `false`               | Print planned operations without copying         |
+| `--by-id`        | `-I`  | `false`               | Use the raw 32-char game ID instead of the title |
+| `--verbose`      | `-v`  | `false`               | Log each file operation                          |
+| `--show-skipped` | `-s`  | `false`               | List unrecognized files after the run            |
+| `--version`      |       |                       | Print version information and exit               |
 
 Exit codes: `0` success · `1` argument error · `2` IO error.
 
 ### Examples
 
-**macOS**
+#### macOS
+
 ```bash
 switch-screenshots -i /Volumes/SD/Nintendo/Album -o ~/Pictures/Switch
 ```
 
-**Linux (Arch)**
+#### Linux (Arch)
+
 ```bash
 switch-screenshots -i /run/media/user/SD/Nintendo/Album -o ~/Pictures/Switch
 ```
 
-**Windows (PowerShell)**
+#### Windows (PowerShell)
+
 ```powershell
 .\switch-screenshots.exe -i D:\Nintendo\Album -o C:\Users\me\Pictures\Switch
 ```
 
-**Dry run — preview without copying**
+#### Dry run — preview without copying
+
 ```bash
 switch-screenshots -i /Volumes/SD/Nintendo/Album --dry-run
 ```
@@ -78,7 +83,7 @@ switch-screenshots -i /Volumes/SD/Nintendo/Album --dry-run
 
 Nintendo Switch screenshots and videos are named like:
 
-```
+```text
 2018101310443100-EBDA73B0F0F1E8C57869EB26D8F65095.jpg
 ```
 
@@ -87,13 +92,13 @@ This tool looks it up in a bundled copy of
 [RenanGreca's `game_ids.json`](https://github.com/RenanGreca/Switch-Screenshots-Manager)
 and copies each file into a subfolder named after the game:
 
-```
+```text
 screenshotsOutput/
 ├── The Legend of Zelda Breath of the Wild/
 │   └── 2018101310443100-<id>.jpg
 ├── Super Mario Odyssey/
 │   └── ...
-└── EBDA73B0F0F1E8C57869EB26D8F65095/   ← fallback for unrecognised IDs
+└── EBDA73B0F0F1E8C57869EB26D8F65095/   ← fallback for unrecognized IDs
     └── ...
 ```
 
