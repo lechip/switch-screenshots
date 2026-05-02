@@ -3,7 +3,10 @@ package organizer
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/lechip/switch-screenshots/internal/gameids"
 )
 
 // knownID maps to "1-2-Switch" in game_ids.json
@@ -126,4 +129,58 @@ func TestSanitizeTitle(t *testing.T) {
 			t.Errorf("sanitizeTitle(%q) = %q, want %q", tt.input, got, tt.want)
 		}
 	}
+}
+
+func TestSanitizeTitle_AllGameIDs(t *testing.T) {
+	for _, title := range gameids.All() {
+		got := sanitizeTitle(title)
+		if got == "" {
+			t.Errorf("sanitizeTitle(%q) = empty string", title)
+		}
+		if strings.Contains(got, "/") {
+			t.Errorf("sanitizeTitle(%q) = %q contains '/'", title, got)
+		}
+		if strings.Contains(got, "\x00") {
+			t.Errorf("sanitizeTitle(%q) = %q contains null byte", title, got)
+		}
+		if got == "." || got == ".." {
+			t.Errorf("sanitizeTitle(%q) = %q is an invalid path component", title, got)
+		}
+	}
+}
+
+func TestRun_ShowSkipped(t *testing.T) {
+	input := t.TempDir()
+	output := t.TempDir()
+
+	screenshot := "shot-" + knownID + ".jpg"
+	ignored := "not-a-screenshot.txt"
+	for _, f := range []string{screenshot, ignored} {
+		if err := os.WriteFile(filepath.Join(input, f), []byte("data"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	t.Run("show-skipped enabled", func(t *testing.T) {
+		res, err := Run(Config{Input: input, Output: output, ShowSkipped: true})
+		if err != nil {
+			t.Fatalf("Run() error: %v", err)
+		}
+		if len(res.SkippedFiles) != 1 {
+			t.Fatalf("SkippedFiles = %v, want 1 entry", res.SkippedFiles)
+		}
+		if !strings.HasSuffix(res.SkippedFiles[0], ignored) {
+			t.Errorf("SkippedFiles[0] = %q, want suffix %q", res.SkippedFiles[0], ignored)
+		}
+	})
+
+	t.Run("show-skipped disabled", func(t *testing.T) {
+		res, err := Run(Config{Input: input, Output: output, ShowSkipped: false})
+		if err != nil {
+			t.Fatalf("Run() error: %v", err)
+		}
+		if len(res.SkippedFiles) != 0 {
+			t.Errorf("SkippedFiles = %v, want empty", res.SkippedFiles)
+		}
+	})
 }
